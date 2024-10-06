@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shopping_list/data/categories.dart';
+import 'package:shopping_list/models/category.dart';
 
 class NewItem extends StatefulWidget {
   const NewItem({super.key});
@@ -12,9 +13,17 @@ class NewItem extends StatefulWidget {
 
 class _NewItem extends State<NewItem> {
   final _formKey = GlobalKey<FormState>();
+  var _enteredName = "";
+  var _enteredQuantity = 1;
+  var _enteredCategory = categories[Categories.vegetables];
 
   void _saveItem() {
-    _formKey.currentState!.validate();
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      print(_enteredName);
+      print(_enteredQuantity);
+      print(_enteredCategory);
+    }
   }
 
   @override
@@ -40,13 +49,16 @@ class _NewItem extends State<NewItem> {
                   }
                   return null;
                 },
+                onSaved: (value) {
+                  _enteredName = value!;
+                },
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(
                     child: TextFormField(
-                      initialValue: "1",
+                      initialValue: _enteredQuantity.toString(),
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null ||
@@ -57,6 +69,9 @@ class _NewItem extends State<NewItem> {
                         }
                         return null;
                       },
+                      onSaved: (value) {
+                        _enteredQuantity = int.parse(value!);
+                      },
                       decoration:
                           const InputDecoration(label: Text("Quantity")),
                     ),
@@ -65,24 +80,31 @@ class _NewItem extends State<NewItem> {
                     width: 8,
                   ),
                   Expanded(
-                    child: DropdownButtonFormField(items: [
-                      for (final category in categories.entries)
-                        DropdownMenuItem(
-                            value: category.value,
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 16,
-                                  height: 16,
-                                  color: category.value.color,
-                                ),
-                                const SizedBox(
-                                  width: 6,
-                                ),
-                                Text(category.value.title)
-                              ],
-                            ))
-                    ], onChanged: (value) {}),
+                    child: DropdownButtonFormField(
+                        value: _enteredCategory,
+                        items: [
+                          for (final category in categories.entries)
+                            DropdownMenuItem(
+                                value: category.value,
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 16,
+                                      height: 16,
+                                      color: category.value.color,
+                                    ),
+                                    const SizedBox(
+                                      width: 6,
+                                    ),
+                                    Text(category.value.title)
+                                  ],
+                                ))
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _enteredCategory = value!;
+                          });
+                        }),
                   )
                 ],
               ),
