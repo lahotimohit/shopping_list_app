@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/category.dart';
 import 'package:shopping_list/models/grocery_item.dart';
+import 'package:http/http.dart' as http;
 
 class NewItem extends StatefulWidget {
   const NewItem({super.key});
@@ -18,15 +21,27 @@ class _NewItem extends State<NewItem> {
   var _enteredQuantity = 1;
   var _enteredCategory = categories[Categories.vegetables];
 
-  void _saveItem() {
+  void _saveItem() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final newItem = GroceryList(
-          id: DateTime.now.toString(),
+      final url = Uri.https(
+          'shopping-list-flutter-d48be-default-rtdb.firebaseio.com',
+          'shopping-list.json');
+      final response = await http.post(url,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: json.encode({
+            "name": _enteredName,
+            "quantity": _enteredQuantity,
+            "category": _enteredCategory!.title
+          }));
+      final resData = json.decode(response.body);
+      Navigator.of(context).pop(GroceryList(
+          id: resData["name"],
           name: _enteredName,
           quantity: _enteredQuantity,
-          category: _enteredCategory!);
-      Navigator.of(context).pop(newItem);
+          category: _enteredCategory!));
     }
   }
 
