@@ -28,6 +28,14 @@ class _GroceryItemState extends State<GroceryItem> {
         _error = "Failed to fetch content.Please try again later...";
       });
     }
+
+    if (response.body == "null") {
+      setState(() {
+        _isloading = false;
+      });
+      return;
+    }
+
     final Map<String, dynamic> listData = json.decode(response.body);
     final List<GroceryList> _loadedItems = [];
     for (final item in listData.entries) {
